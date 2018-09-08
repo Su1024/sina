@@ -4,8 +4,36 @@
 #
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
+import random
 
 from scrapy import signals
+
+
+class randomUserAgentDownloaderMiddleware(object):
+    def process_request(self, request, spider):
+        """
+        引擎将 request对象给下载器时执行,
+        返回None 继续执行
+        返回Response 中断执行, 将response返回给引擎
+        :param request:
+        :param spider:
+        :return:
+        """
+        first_num = random.randint(55, 62)
+        third_num = random.randint(0, 3200)
+        fourth_num = random.randint(0, 140)
+        os_type = [
+            '(Windows NT 6.1; WOW64)', '(Windows NT 10.0; WOW64)', '(X11; Linux x86_64)',
+            '(Macintosh; Intel Mac OS X 10_12_6)'
+        ]
+        chrome_version = 'Chrome/{}.0.{}.{}'.format(first_num, third_num, fourth_num)
+
+        ua = ' '.join(['Mozilla/5.0', random.choice(os_type), 'AppleWebKit/537.36',
+                       '(KHTML, like Gecko)', chrome_version, 'Safari/537.36']
+                      )
+        request.headers['User-Agent'] = ua
+
+        return None
 
 
 class SinaSpiderMiddleware(object):
@@ -57,6 +85,10 @@ class SinaSpiderMiddleware(object):
 
 
 class SinaDownloaderMiddleware(object):
+    """
+    启动时回调
+    """
+
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the downloader middleware does not modify the
     # passed objects.
@@ -69,6 +101,14 @@ class SinaDownloaderMiddleware(object):
         return s
 
     def process_request(self, request, spider):
+        """
+        引擎吧request给下载器时回调
+        返回None时候回调
+        返回Response 中断流程把response给引擎
+        :param request:
+        :param spider:
+        :return:
+        """
         # Called for each request that goes through the downloader
         # middleware.
 
@@ -81,6 +121,13 @@ class SinaDownloaderMiddleware(object):
         return None
 
     def process_response(self, request, response, spider):
+        """
+        把新的请求
+        :param request:
+        :param response:
+        :param spider:
+        :return:
+        """
         # Called with the response returned from the downloader.
 
         # Must either;
